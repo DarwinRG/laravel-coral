@@ -38,6 +38,11 @@ class SiteSeeder extends Seeder
                     'url' => '/contact',
                     'type' => 'internal',
                 ],
+                [
+                    'title' => 'Dashboard',
+                    'url' => '/admin',
+                    'type' => 'internal',
+                ],
             ],
         ]);
 
