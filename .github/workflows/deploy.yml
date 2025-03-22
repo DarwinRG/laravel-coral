@@ -93,6 +93,7 @@ jobs:
             php artisan view:clear
             php artisan view:cache
             php artisan migrate --force
+            sudo chmod -R 777 /var/www/laravel-coral/storage
             
             # Clean up temp directory
             rm -rf /var/www/laravel-coral-temp
