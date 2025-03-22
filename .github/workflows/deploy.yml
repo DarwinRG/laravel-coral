@@ -49,17 +49,11 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
           
-      - name: Add server to known hosts
+      - name: Add server to known hosts (robust)
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -v -H thecoral.darwinrg.me >> ~/.ssh/known_hosts || (sleep 5 && ssh-keyscan -v -H thecoral.darwinrg.me >> ~/.ssh/known_hosts)
-        shell: /usr/bin/bash -e {0}
-        env:
-          COMPOSER_PROCESS_TIMEOUT: 0
-          COMPOSER_NO_INTERACTION: 1
-          COMPOSER_NO_AUDIT: 1
-          SSH_AUTH_SOCK: /tmp/ssh-dpLCnYpy4XAr/agent.2809
-          SSH_AGENT_PID: 2810
+          ssh-keyscan -H thecoral.darwinrg.me >> ~/.ssh/known_hosts || true
+          ssh-keyscan -H 206.189.94.168 >> ~/.ssh/known_hosts
         
       - name: Deploy to production
         run: |
