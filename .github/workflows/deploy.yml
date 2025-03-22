@@ -1,4 +1,4 @@
-name: Deploy Laravel to VPS
+name: Deploy Laravel to DigitalOcean
 
 on:
   push:
@@ -7,42 +7,61 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Setup PHP
+        uses: actions/checkout@v3
+        
+      - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, bcmath, gd
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, bcmath, zip
           coverage: none
-
-      - name: Install Dependencies
-        run: composer install --no-dev --optimize-autoloader
-
-      - name: Deploy to VPS
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: coral
-          password: ${{ secrets.PASSWORD }}
-          source: "."
-          target: "/var/www/coral.darwinrg.me"
           
-      - name: Post-deployment commands
-        uses: appleboy/ssh-action@master
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+        
+      - name: Create .env file
+        run: |
+          cp .env.example .env
+          sed -i 's/APP_ENV=.*/APP_ENV=production/' .env
+          sed -i 's/APP_DEBUG=.*/APP_DEBUG=false/' .env
+          sed -i 's/APP_URL=.*/APP_URL=https:\/\/coral.darwinrg.me/' .env
+          sed -i 's/DB_DATABASE=.*/DB_DATABASE=laravel_coral/' .env
+          sed -i 's/DB_USERNAME=.*/DB_USERNAME=coral/' .env
+          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=${{ secrets.DB_PASSWORD }}/' .env
+        
+      - name: Generate application key
+        run: php artisan key:generate --force
+        
+      - name: Directory permissions
+        run: chmod -R 755 storage bootstrap/cache
+        
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.7.0
         with:
-          host: ${{ secrets.HOST }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          
+      - name: Add server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H coral.darwinrg.me >> ~/.ssh/known_hosts
+        
+      - name: Deploy to production
+        run: |
+          rsync -avz --delete --exclude-from='.deployignore' ./ coral@coral.darwinrg.me:/var/www/laravel-coral/
+          
+      - name: Run post-deployment tasks
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: coral.darwinrg.me
           username: coral
-          password: ${{ secrets.PASSWORD }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /var/www/coral.darwinrg.me
+            cd /var/www/laravel-coral
             php artisan migrate --force
+            php artisan optimize
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
-            sudo chown -R coral:www-data /var/www/coral.darwinrg.me
-            sudo find /var/www/coral.darwinrg.me -type f -exec chmod 664 {} \;
-            sudo find /var/www/coral.darwinrg.me -type d -exec chmod 775 {} \;
-            sudo chmod -R 775 /var/www/coral.darwinrg.me/storage /var/www/coral.darwinrg.me/bootstrap/cache
