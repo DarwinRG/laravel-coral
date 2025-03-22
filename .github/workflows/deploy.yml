@@ -79,6 +79,7 @@ jobs:
             php artisan view:clear
             php artisan view:cache
             php artisan migrate --force
+            php artisan storage:link
             
             # Clean up temp directory
             rm -rf /var/www/laravel-coral-temp
