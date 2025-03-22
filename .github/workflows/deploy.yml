@@ -1,0 +1,48 @@
+name: Deploy Laravel to VPS
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, bcmath, gd
+          coverage: none
+
+      - name: Install Dependencies
+        run: composer install --no-dev --optimize-autoloader
+
+      - name: Deploy to VPS
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: coral
+          password: ${{ secrets.PASSWORD }}
+          source: "."
+          target: "/var/www/coral.darwinrg.me"
+          
+      - name: Post-deployment commands
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: coral
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            cd /var/www/coral.darwinrg.me
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            sudo chown -R coral:www-data /var/www/coral.darwinrg.me
+            sudo find /var/www/coral.darwinrg.me -type f -exec chmod 664 {} \;
+            sudo find /var/www/coral.darwinrg.me -type d -exec chmod 775 {} \;
+            sudo chmod -R 775 /var/www/coral.darwinrg.me/storage /var/www/coral.darwinrg.me/bootstrap/cache
