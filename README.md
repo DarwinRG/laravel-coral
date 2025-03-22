@@ -1,42 +1,31 @@
-# filament-peek-demo
+# Laravel Coral
 
-This is a demo project showcasing the [Peek](https://github.com/pboivin/filament-peek/) plugin for [Filament](https://filamentphp.com/).
+Welcome to **Laravel Coral**, a Laravel-based application designed to provide a robust and scalable foundation for your web application.
 
-**Full-page Preview Modal**
+## Features
 
-![Screenshots of the edit page and preview modal](./art/01-page-preview.jpg)
+- **User Management**: Includes user authentication, and password management.
+- **Blog System**: Manage posts, categories, and featured content.
+- **Menu Management**: Dynamic menus for navigation.
+- **Admin Dashboard**: Built with Filament for an intuitive admin experience.
+- **API Support**: Includes Laravel Sanctum for API authentication.
+- **Responsive Design**: TailwindCSS for modern and responsive UI.
 
----
+## Project Structure
 
-**Builder Field Preview and Editor**
+- **`app/`**: Contains the core application logic, including models, controllers, and services.
+- **`config/`**: Configuration files for the application.
+- **`database/`**: Migrations, seeders, and factories for database management.
+- **`public/`**: Publicly accessible files, including the entry point (`index.php`).
+- **`resources/`**: Views, assets, and localization files.
+- **`routes/`**: Application routes (`web.php`, `api.php`, etc.).
+- **`tests/`**: Unit and feature tests for the application.
 
-![Screenshots of the edit page and builder field preview](./art/02-builder-preview.jpg)
+## Key Packages
 
----
+- **Filament**: For building admin dashboards and forms.
+- **Laravel Sanctum**: For API authentication.
+- **TailwindCSS**: For styling and responsive design.
+- **Tip-tap Editor**: For the builtin editor.
+- **Peek Plugin**: A filament plugin for previewing changes in the editor.
 
-**[Tiptap Editor](https://github.com/awcodes/filament-tiptap-editor) Integration**
-
-![Screenshots of the edit page and the Tiptap Editor form field](./art/03-tiptap.jpg)
-
-## Initial setup
-
-```sh
-composer install
-
-cp .env.example .env
-
-touch database/database.sqlite
-
-php artisan migrate:fresh --seed
-
-php artisan storage:link
-
-php artisan serve
-```
-
-The site should be available locally on [localhost:8000](http://localhost:8000)
-
-You can log into the admin at [localhost:8000/admin](http://localhost:8000/admin) with the following credentials:
-
-- Email: `admin@test.test`
-- Password: `admin@test.test`
