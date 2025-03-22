@@ -11,23 +11,29 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        
+
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
           extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, bcmath, zip
           coverage: none
-          
+
+      - name: Update Composer
+        run: composer self-update
+
+      - name: Clear Composer Cache
+        run: composer clear-cache
+
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
+        run: composer install --prefer-dist --no-progress --no-interaction --no-suggest --verbose
         
       - name: Create .env file
         run: |
           cp .env.example .env
           sed -i 's/APP_ENV=.*/APP_ENV=production/' .env
           sed -i 's/APP_DEBUG=.*/APP_DEBUG=false/' .env
-          sed -i 's/APP_URL=.*/APP_URL=https:\/\/coral.darwinrg.me/' .env
+          sed -i 's/APP_URL=.*/APP_URL=https:\/\/thecoral.darwinrg.me/' .env
           sed -i 's/DB_DATABASE=.*/DB_DATABASE=laravel_coral/' .env
           sed -i 's/DB_USERNAME=.*/DB_USERNAME=coral/' .env
           sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=${{ secrets.DB_PASSWORD }}/' .env
@@ -46,11 +52,11 @@ jobs:
       - name: Add server to known hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H coral.darwinrg.me >> ~/.ssh/known_hosts
+          ssh-keyscan -H thecoral.darwinrg.me >> ~/.ssh/known_hosts
         
       - name: Deploy to production
         run: |
-          rsync -avz --delete --exclude-from='.deployignore' ./ coral@coral.darwinrg.me:/var/www/laravel-coral/
+          rsync -avz --delete --exclude-from='.deployignore' ./ coral@thecoral.darwinrg.me:/var/www/laravel-coral/
           
       - name: Run post-deployment tasks
         uses: appleboy/ssh-action@v0.1.10
