@@ -61,16 +61,32 @@ jobs:
             # Move files from temp directory to production
             rsync -avz --delete --exclude '.git' --exclude 'storage/app/*' --exclude 'storage/logs/*' --exclude 'storage/framework/sessions/*' /var/www/laravel-coral-temp/ /var/www/laravel-coral/
             
-            # Set proper permissions
+            # Enhanced permission fixes - this is the critical part that needs improvement
             sudo chown -R coral:www-data /var/www/laravel-coral
             sudo find /var/www/laravel-coral -type f -exec chmod 664 {} \;
             sudo find /var/www/laravel-coral -type d -exec chmod 775 {} \;
-            sudo chmod -R ug+rwx /var/www/laravel-coral/storage /var/www/laravel-coral/bootstrap/cache
+            
+            # Extra permission fix for storage directory (this fixed your 500 error)
+            sudo chmod -R 775 /var/www/laravel-coral/storage
+            sudo chmod -R 775 /var/www/laravel-coral/bootstrap/cache
+            
+            # Create required storage directories if they don't exist
+            mkdir -p /var/www/laravel-coral/storage/framework/{sessions,views,cache}
+            mkdir -p /var/www/laravel-coral/storage/logs
+            
+            # Set proper ownership for storage directories
+            sudo chown -R www-data:www-data /var/www/laravel-coral/storage
+            
+            # Make sure storage subdirectories are writable
+            sudo chmod -R 775 /var/www/laravel-coral/storage/logs
+            sudo chmod -R 775 /var/www/laravel-coral/storage/framework
+            sudo chmod -R 775 /var/www/laravel-coral/bootstrap/cache
             
             # Run Laravel commands
             cd /var/www/laravel-coral
           
             php artisan config:clear
+            php artisan cache:clear
             php artisan config:cache
             php artisan route:clear
             php artisan route:cache
