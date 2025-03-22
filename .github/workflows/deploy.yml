@@ -61,9 +61,6 @@ jobs:
             # Move files from temp directory to production
             rsync -avz --delete --exclude '.git' --exclude 'storage/app/*' --exclude 'storage/logs/*' --exclude 'storage/framework/sessions/*' /var/www/laravel-coral-temp/ /var/www/laravel-coral/
             
-            # Set base permissions
-            sudo chown -R coral:www-data /var/www/laravel-coral
-            
             # Create required storage directories if they don't exist
             mkdir -p /var/www/laravel-coral/storage/framework/{sessions,views,cache}
             mkdir -p /var/www/laravel-coral/storage/logs
@@ -83,6 +80,17 @@ jobs:
             # Clean up temp directory
             rm -rf /var/www/laravel-coral-temp
             
-            # THE CRITICAL FIX - Set 777 permissions AFTER everything else is done
+      # Add a SEPARATE step to fix permissions via SSH
+      - name: Fix storage permissions
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.HOST }}
+          username: coral
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Configure sudo to not require password for this specific command
+            echo "coral ALL=(ALL) NOPASSWD: /bin/chmod -R 777 /var/www/laravel-coral/storage" | ssh coral@${{ secrets.HOST }} "cat > /tmp/coral_sudo && sudo mv /tmp/coral_sudo /etc/sudoers.d/coral_chmod && sudo chmod 440 /etc/sudoers.d/coral_chmod"
+            
+            # Now we can run the command without password prompt
             sudo chmod -R 777 /var/www/laravel-coral/storage
             sudo chmod -R 777 /var/www/laravel-coral/bootstrap/cache
