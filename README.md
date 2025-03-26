@@ -1,7 +1,9 @@
 # The Coral
+## Introduction
 
-The CORAL is a platform developed by the Panpacific University Student Council and the Student Crime Prevention Council (SCPC) to empower students to voice their concerns and promote mental well-being. It provides a safe and supportive space for students to express their thoughts, share experiences, and seek guidance.
+The Coral is a collaborative platform developed by DarwinRG for the Panpacific University Student Council and the Student Crime Prevention Council (SCPC). It empowers the student body to connect with peers by sharing university events aligned with Sustainable Development Goals (SDGs). The platform also provides a direct communication channel for students to voice their concerns to the Student Council, enhancing campus engagement and governance.
 
+ 
 ## Features
 
 - **User Management**: Includes user authentication, and password management.
